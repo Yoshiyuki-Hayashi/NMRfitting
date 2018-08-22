@@ -52,14 +52,16 @@ gammaCu = 11.2893305 #MHz/T, 63Cu
 Li_num = 'Li2'
 
 T1_ended = 'yes'
-fssum_ended = 'yes'
+ft_plot = 'yes'
+ft_plot_range = [-200,200]
+fssum_ended = 'no'
 gauss = 'd'## s = single gaussian, d = double gaussian, t = triple gaussian 
 
 
 header = '20180601-betaLi2IrO3_S47hishi2-AP-b-4T'
 
 if T1_ended=='yes':
-    for name in glob.glob(header+'7'+str(Li_num)+'-*-T1-auto.dat'):
+    for name in glob.glob(header+'7'+str(Li_num)+'-*-T1-rect50.dat'):
         T1 = name
 ##for name in glob.glob('*-T2-rect50.dat'):
 ##    T2 = name
@@ -75,8 +77,8 @@ skip_ftCu = 1#65539#only header->1
 
 for name in glob.glob(header+'7'+str(Li_num)+'-*-td.dat'):
     tdLi = name
-##for name in glob.glob(header+'7'+str(Li_num)+'-*-ft.dat'):
-##    ftLi = name
+for name in glob.glob(header+'7'+str(Li_num)+'-*-ft.dat'):
+    ftLi = name
 if fssum_ended == 'yes':
     for name in glob.glob(header+'7'+str(Li_num)+'*-fssum-autotune.dat'):
        fssum = name
@@ -86,7 +88,7 @@ if fssum_ended == 'yes':
 
 ##### parameters to change ######
 P = 0.0 ##GPa
-T = 40.0 ##K
+T = 240.0 ##K
 B_nominal = 4 #T
 
 T_err = T/40.0
@@ -95,7 +97,7 @@ rep = 1000.0#ms of fssum measurement
 tau = 20.0#us of fssum measurement
 
 
-cfreqCu = 45.61#MHz
+cfreqCu = 45.486#MHz
 if Li_num =='Li0':
     cfreqLi = 66.26#MHz    ##cfreq is not pfreq.
 if Li_num =='Li1':
@@ -132,12 +134,12 @@ Lcut_P1 = 0.0
 Ucut_P1 = 10**(10)
 
 #s
-iniT1inv = 0.1#1/s
+iniT1inv = 10#1/s
 
 #d
-ini_r = 0.5
-iniT1inv1 = 0.1#1/s
-iniT1inv2 = 10.0
+ini_r = 0.1
+iniT1inv1 = 10.0#1/s
+iniT1inv2 = 20.0
 
 #t
 ini_r = 1.0
@@ -164,8 +166,8 @@ widthLi = 0.5 # width = 1 => fitting on FWHM
 
 #### fssum dbl & tpl gaussian fit ####
 sglg_ini = [0.0031796, 68.127, 0.038605]
-dblg_ini = [0.01097, 66.629, 0.364,\
-            0.005822, 67.903, 0.36232]
+dblg_ini = [0.004, 66.528, 0.05,\
+            0.002, 66.593, 0.05]
 tplg_ini = [0.0055496, 66.834, 0.05, \
             0.017265, 66.911, 0.070877, \
             0.0039502, 67.063, 0.056152]
@@ -176,6 +178,19 @@ Ucut = 68.5
 width = 3.0 #width = 1 => integration on FWHM
 k = 12 #2**k+1 = 2**12+1 = 4097 = the number of sampling in the integration region
 
+#################################
+if ft_plot == 'yes':
+    filename = ftLi
+    data = np.loadtxt(filename, skiprows=1, usecols=(0,3))
+    freq = data[:,0]
+    absV = data[:,1]
+    
+    plt.figure()
+    plt.xlim(ft_plot_range[0], ft_plot_range[1])
+    plt.plot (freq, absV)
+    plt.xlabel ('freq (kHz)')
+    plt.ylabel ('Abs. (V)')
+    plt.savefig('ft-' + str(T) +'K_'+str(Li_num)+'.eps')
 #################################
 if T1_ended == 'yes':
     filename = T1
